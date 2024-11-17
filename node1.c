@@ -26,6 +26,21 @@ struct distance_table {
 
 void rtinit1() {
 
+    for (int i =0; i< ROW_SIZE; i++){
+        if(i == NODE_ID){
+            continue;
+        }
+
+        struct rtpkt temp;
+        temp.sourceid = NODE_ID;
+        temp.destid = i;
+        temp.mincost[0] = 1;
+        temp.mincost[1] = 0;
+        temp.mincost[2] = 1;
+        temp.mincost[3] = 999;
+        tolayer2(temp);
+
+    }
 }
 
 void rtupdate1(rcvdpkt) struct rtpkt *rcvdpkt;

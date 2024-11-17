@@ -24,6 +24,21 @@ struct distance_table {
 
 void rtinit3() {
 
+    for (int i =0; i< ROW_SIZE; i++){
+        if(i == NODE_ID){
+            continue;
+        }
+
+        struct rtpkt temp;
+        temp.sourceid = NODE_ID;
+        temp.destid = i;
+        temp.mincost[0] = 7;
+        temp.mincost[1] = 999;
+        temp.mincost[2] = 2;
+        temp.mincost[3] = 0;
+        tolayer2(temp);
+
+    }
 }
 
 

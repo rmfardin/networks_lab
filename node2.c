@@ -30,6 +30,21 @@ from which the shortest path is taken. If set to null, it is ignored.
 
 void rtinit2() {
 
+    for (int i =0; i< ROW_SIZE; i++){
+        if(i == NODE_ID){
+            continue;
+        }
+
+        struct rtpkt temp;
+        temp.sourceid = NODE_ID;
+        temp.destid = i;
+        temp.mincost[0] = 3;
+        temp.mincost[1] = 1;
+        temp.mincost[2] = 0;
+        temp.mincost[3] = 2;
+        tolayer2(temp);
+
+    }
 }
 
 void rtupdate2(rcvdpkt) struct rtpkt *rcvdpkt;

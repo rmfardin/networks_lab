@@ -21,10 +21,27 @@ struct distance_table {
 
 #define NODE_ID 0
 
+extern void tolayer2(struct rtpkt packet);
+
 /* students to write the following two routines, and maybe some others */
 
 void rtinit0() {
 
+    for (int i =0; i< ROW_SIZE; i++){
+        if(i == NODE_ID){
+            continue;
+        }
+
+        struct rtpkt temp;
+        temp.sourceid = NODE_ID;
+        temp.destid = i;
+        temp.mincost[0] = 0;
+        temp.mincost[1] = 1;
+        temp.mincost[2] = 3;
+        temp.mincost[3] = 7;
+        tolayer2(temp);
+
+    }
 }
 
 void rtupdate0(rcvdpkt) struct rtpkt *rcvdpkt;
