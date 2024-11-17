@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>  // M. Yuksel
+#include <stdbool.h>
 
 #define LINKCHANGES 1
 /* ******************************************************************

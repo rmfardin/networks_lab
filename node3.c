@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdbool.h>
 
 struct rtpkt {
     int sourceid;   /* id of sending router sending this pkt */
@@ -20,6 +21,7 @@ struct distance_table {
 
 #define NODE_ID 3
 
+extern void tolayer2(struct rtpkt packet);
 /* students to write the following two routines, and maybe some others */
 
 void rtinit3() {
@@ -45,7 +47,38 @@ void rtinit3() {
 
 void rtupdate3(rcvdpkt) struct rtpkt *rcvdpkt;
 {
+    int src = rcvdpkt->sourceid;
+    bool update = false;
 
+    for(int i = 0; i < ROW_SIZE; i++){
+        if (i == NODE_ID){
+            continue;
+        }
+
+        int new_cost = dt3.costs[src][NODE_ID] + rcvdpkt->mincost[i];
+        if (new_cost < dt3.costs[NODE_ID][i]){
+            dt3.costs[NODE_ID][src] = new_cost;
+            update = true;
+        }
+    }
+
+    if (update){
+        for (int i =0; i< ROW_SIZE; i++){
+            if(i == NODE_ID){
+                continue;
+            }
+
+            struct rtpkt new_pkt;
+            new_pkt.sourceid = NODE_ID;
+            new_pkt.destid = i;
+
+            for (int j = 0; j < ROW_SIZE; j++) {
+                new_pkt.mincost[j] = dt3.costs[NODE_ID][j];
+            }
+
+            tolayer2(new_pkt);
+        }
+    }
 }
 
 printdt3(dtptr) struct distance_table *dtptr;

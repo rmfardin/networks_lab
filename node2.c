@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdbool.h>
 
 struct rtpkt {
     int sourceid;   /* id of sending router sending this pkt */
@@ -19,6 +20,8 @@ struct distance_table {
 #define COL_SIZE 4
 
 #define NODE_ID 2
+
+extern void tolayer2(struct rtpkt packet);
 
 /*
 returns the minimum distance between node NODE_ID and node row_idx
@@ -49,7 +52,38 @@ void rtinit2() {
 
 void rtupdate2(rcvdpkt) struct rtpkt *rcvdpkt;
 {
+    int src = rcvdpkt->sourceid;
+    bool update = false;
 
+    for(int i = 0; i < ROW_SIZE; i++){
+        if (i == NODE_ID){
+            continue;
+        }
+
+        int new_cost = dt2.costs[src][NODE_ID] + rcvdpkt->mincost[i];
+        if (new_cost < dt2.costs[NODE_ID][i]){
+            dt2.costs[NODE_ID][src] = new_cost;
+            update = true;
+        }
+    }
+
+    if (update){
+        for (int i =0; i< ROW_SIZE; i++){
+            if(i == NODE_ID){
+                continue;
+            }
+
+            struct rtpkt new_pkt;
+            new_pkt.sourceid = NODE_ID;
+            new_pkt.destid = i;
+
+            for (int j = 0; j < ROW_SIZE; j++) {
+                new_pkt.mincost[j] = dt2.costs[NODE_ID][j];
+            }
+
+            tolayer2(new_pkt);
+        }
+    }
 }
 
 printdt2(dtptr) struct distance_table *dtptr;

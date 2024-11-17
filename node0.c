@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdbool.h>
 
 
 struct rtpkt {
@@ -12,7 +13,7 @@ extern int TRACE;
 extern int YES;
 extern int NO;
 
-struct distance_table {
+struct dt0 {
     int costs[4][4];
 } dt0;
 
@@ -46,10 +47,41 @@ void rtinit0() {
 
 void rtupdate0(rcvdpkt) struct rtpkt *rcvdpkt;
 {
+    int src = rcvdpkt->sourceid;
+    bool update = false;
 
+    for(int i = 0; i < ROW_SIZE; i++){
+        if (i == NODE_ID){
+            continue;
+        }
+
+        int new_cost = dt0.costs[src][NODE_ID] + rcvdpkt->mincost[i];
+        if (new_cost < dt0.costs[NODE_ID][i]){
+            dt0.costs[NODE_ID][src] = new_cost;
+            update = true;
+        }
+    }
+
+    if (update){
+        for (int i =0; i< ROW_SIZE; i++){
+            if(i == NODE_ID){
+                continue;
+            }
+
+            struct rtpkt new_pkt;
+            new_pkt.sourceid = NODE_ID;
+            new_pkt.destid = i;
+
+            for (int j = 0; j < ROW_SIZE; j++) {
+                new_pkt.mincost[j] = dt0.costs[NODE_ID][j];
+            }
+
+            tolayer2(new_pkt);
+        }
+    }
 }
 
-printdt0(dtptr) struct distance_table *dtptr;
+printdt0(dtptr) struct dt0 *dtptr;
 
 {
     printf("\n                via     \n");
