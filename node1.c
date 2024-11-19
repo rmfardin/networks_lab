@@ -27,20 +27,27 @@ extern void tolayer2(struct rtpkt packet);
 
 void rtinit1() {
 
-    for (int i =0; i< ROW_SIZE; i++){
-        if(i == NODE_ID){
-            continue;
+    for (int i = 0; i < 4; i++) {
+        for (int j = 0; j < 4; j++) {
+            dt1.costs[i][j] = 999;
         }
+    }
 
-        struct rtpkt temp;
-        temp.sourceid = NODE_ID;
-        temp.destid = i;
-        temp.mincost[0] = 1;
-        temp.mincost[1] = 0;
-        temp.mincost[2] = 1;
-        temp.mincost[3] = 999;
-        tolayer2(temp);
+    dt1.costs[0][0] = 1;   
+    dt1.costs[1][1] = 0;   
+    dt1.costs[2][2] = 1;   
+    dt1.costs[3][3] = 999;   
 
+    struct rtpkt packet;
+    for (int i = 0; i < ROW_SIZE; i++) {
+        if (i != NODE_ID && dt1.costs[i][i] < 999) { 
+            packet.sourceid = NODE_ID;
+            packet.destid = i;
+            for (int j = 0; j < ROW_SIZE; j++) {
+                packet.mincost[j] = dt1.costs[j][j];
+            }
+            tolayer2(packet);
+        }
     }
 }
 
@@ -50,33 +57,40 @@ void rtupdate1(rcvdpkt) struct rtpkt *rcvdpkt;
     bool update = false;
 
     for(int i = 0; i < ROW_SIZE; i++){
-        if (i == NODE_ID){
-            continue;
-        }
-
-        int new_cost = dt1.costs[src][NODE_ID] + rcvdpkt->mincost[i];
-        if (new_cost < dt1.costs[NODE_ID][i]){
-            dt1.costs[NODE_ID][src] = new_cost;
+        
+        int new_cost = dt1.costs[src][src] + rcvdpkt->mincost[i];
+        if (new_cost < dt1.costs[i][src]){
+            dt1.costs[i][src] = new_cost;
             update = true;
         }
     }
 
-    if (update){
-        for (int i =0; i< ROW_SIZE; i++){
-            if(i == NODE_ID){
-                continue;
+    int min_array[4];
+    for (int i = 0; i < ROW_SIZE; i++) {
+        min_array[i] = 999;
+
+        for (int j = 0; j < 4; j++) { // Via node j
+            if (dt1.costs[i][j] < min_array[i]) {
+                min_array[i] = dt1.costs[i][j];
             }
-
-            struct rtpkt new_pkt;
-            new_pkt.sourceid = NODE_ID;
-            new_pkt.destid = i;
-
-            for (int j = 0; j < ROW_SIZE; j++) {
-                new_pkt.mincost[j] = dt1.costs[NODE_ID][j];
-            }
-
-            tolayer2(new_pkt);
         }
+    }
+
+    if (update){
+        struct rtpkt new_pkt;
+        new_pkt.sourceid = NODE_ID;
+
+        for (int i =0; i< ROW_SIZE; i++){
+            new_pkt.mincost[i] = min_array[i];
+        }
+
+        for (int i = 0; i < ROW_SIZE; i++) {
+            if (i != NODE_ID && dt1.costs[i][i] < 999) { 
+                new_pkt.destid = i;
+                tolayer2(new_pkt);
+            }
+        }
+
     }
 }
 
